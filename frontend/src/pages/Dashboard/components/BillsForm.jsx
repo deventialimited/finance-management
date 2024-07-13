@@ -20,7 +20,11 @@ const BillsForm = ({ isAEOpen, setIsAEOpen }) => {
     const errors = {};
     if (!formData.billName) errors.billName = 'Bill Name is required';
     if (!formData.billType) errors.billType = 'BillType is required';
-    if (!formData.amount) errors.amount = 'Amount is required';
+    if (!formData.amount) {
+      errors.amount = 'Amount is required';
+    } else if (parseFloat(formData.amount) <= 0) {
+      errors.amount = 'Amount must be greater than 0';
+    }
     if (!formData.dueDate) errors.dueDate = 'Due Date is required';
     return errors;
   };
@@ -79,7 +83,7 @@ const BillsForm = ({ isAEOpen, setIsAEOpen }) => {
       <div>
         <label className="block font-medium">Amount</label>
         <input
-          type="text"
+          type="Number"
           name="amount"
           value={formData.amount}
           onChange={handleChange}

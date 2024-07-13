@@ -10,7 +10,8 @@ const PaymentSchema = new mongoose.Schema({
 const DebtSchema = new mongoose.Schema({
   debtName: { type: String, required: true },
   category: { type: String, required: true },
-  payments: [PaymentSchema]
+  payments: [PaymentSchema],
+  createdAt: { type: Date, default: Date.now },
 });
 
 const Debt = mongoose.model("Debt", DebtSchema);

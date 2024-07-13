@@ -63,7 +63,12 @@ const TransactionsForm = ({ isAEOpen, setIsAEOpen }) => {
     if (!formData.transactionName)
       errors.transactionName = 'Transaction Name is required';
     if (!formData.category) errors.category = 'Category is required';
-    if (!formData.amount) errors.amount = 'Amount is required';
+    if (!formData.amount) {
+      errors.amount = 'Amount is required';
+    } else if (parseFloat(formData.amount) <= 0) {
+      errors.amount = 'Amount must be greater than 0';
+    }
+
     if (!formData.transactionDate)
       errors.transactionDate = 'Transaction Date is required';
     return errors;
@@ -136,7 +141,7 @@ const TransactionsForm = ({ isAEOpen, setIsAEOpen }) => {
       <div>
         <label className="block font-medium">Amount</label>
         <input
-          type="text"
+          type="Number"
           name="amount"
           value={formData.amount}
           onChange={handleChange}

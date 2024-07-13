@@ -5,17 +5,25 @@ import Header from './components/Header';
 import TopTwoCards from './components/TopTwoCards';
 import ClassificationTable from './components/ClassificationTable';
 import AddCategoryModal from './components/AddCategoryModal';
+import EditCategoryModal from './components/EditCategoryModal';
 const Savings = () => {
   const { sidebarOpen, setSidebarOpen } = useSidebarStore();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isAOpen, setIsAOpen] = useState(false);
+  const [isEOpen, setIsEOpen] = useState(false);
   return (
     <DefaultLayout>
       {/* <!-- ===== Header Start ===== --> */}
       <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       {/* <!-- ===== Header End ===== --> */}
-      <AddCategoryModal isOpen={isOpen} setIsOpen={setIsOpen} />
+      <AddCategoryModal isAOpen={isAOpen} setIsAOpen={setIsAOpen} />
+      <EditCategoryModal isEOpen={isEOpen} setIsEOpen={setIsEOpen} />
       <TopTwoCards />
-      <ClassificationTable isOpen={isOpen} setIsOpen={setIsOpen} />
+      <ClassificationTable
+        isAOpen={isAOpen}
+        setIsAOpen={setIsAOpen}
+        isEOpen={isEOpen}
+        setIsEOpen={setIsEOpen}
+      />
     </DefaultLayout>
   );
 };

@@ -97,9 +97,9 @@ const getArrow = (change) => {
 const Breakdown = () => {
   const { expenses } = useBackendDataStore();
   return (
-    <div className="grid text-[#7c7c80] xl:grid-cols-3 sm:grid-cols-2 xl:gap-10 lg:gap-7 gap-5">
+    <div className=" flex flex-wrap text-[#7c7c80] items-start align-top flex-col sm:flex-row justify-center xl:gap-10 lg:gap-7 gap-5">
       {expenses.map((expense, index) => (
-        <div key={index} className=" rounded-lg shadow-lg  ">
+        <div key={index} className=" rounded-lg sm:w-[45%] w-full h-max shadow-lg  ">
           <div className="flex justify-between items-center border-b py-4 bg-[#FAFAFA] p-4 rounded-t-xl">
             <div className="flex items-center gap-3">
               <div className=" bg-[#f3f3f3] flex flex-col h-full w-10 justify-center items-center px-2 py-3 rounded-md">

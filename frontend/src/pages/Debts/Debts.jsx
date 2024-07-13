@@ -1,14 +1,14 @@
 // /components/DonutChart.jsx
 import React, { useState } from 'react';
 import Chart from 'react-apexcharts';
-const DonutChart = () => {
+const DonutChart = ({ payments }) => {
   const chartOptions = {
-    series: [44, 55, 41, 27],
+    series: payments?.map((payment) => parseFloat(payment.amount)),
     options: {
       chart: {
         type: 'donut',
       },
-      labels: ['1', '2', '3', '4'],
+      labels: payments?.map((payment) => payment.name),
       dataLabels: {
         enabled: false,
       },
@@ -35,30 +35,20 @@ const DonutChart = () => {
           donut: {
             labels: {
               show: true,
-              name: {
-                show: true,
-                fontSize: '22px',
-                fontFamily: 'Arial',
-                color: '#373b74',
-                offsetY: -10,
-              },
-              value: {
-                show: true,
-                fontSize: '16px',
-                fontFamily: 'Arial',
-                color: '#373b74',
-                offsetY: 10,
-                formatter: function () {
-                  return '$450';
-                },
-              },
               total: {
                 show: true,
                 showAlways: true,
-                label: '$450',
+                label: 'Total',
                 fontSize: '22px',
                 fontFamily: 'Arial',
                 color: '#373b74',
+                formatter: function (w) {
+                  const total = w.globals.seriesTotals.reduce(
+                    (a, b) => a + b,
+                    0,
+                  );
+                  return `$${total}`;
+                },
               },
             },
           },
@@ -79,8 +69,7 @@ const DonutChart = () => {
           options={chartOptions.options}
           series={chartOptions.series}
           type="donut"
-          height={250}
-          width="250"
+          height={350}
         />
       </div>
     </div>
@@ -88,67 +77,111 @@ const DonutChart = () => {
 };
 
 // /components/Card.jsx
-const Card = ({ debtName, debtToPay, debtPaid, leftToSave }) => {
+const Card = ({ debtName, category, payments, debtId }) => {
+  const { debts, updateAllDebts } = useBackendDataStore();
+  const [showAll, setShowAll] = useState(false);
+  const navigate = useNavigate();
+  const displayedPayments = showAll ? payments : payments.slice(0, 3);
+  const handleDeleteDebt = async (id) => {
+    try {
+      const result = await deleteDebt(id);
+      if (result) {
+        console.log('Debt deleted successfully', result);
+        // Handle state update or any other action after successful deletion
+        // Find index of the deleted debt in the debts array
+        const index = debts.findIndex((debt) => debt._id === result._id);
+
+        if (index !== -1) {
+          // Create a new array without the deleted debt
+          const updatedDebts = [
+            ...debts.slice(0, index),
+            ...debts.slice(index + 1),
+          ];
+          updateAllDebts(updatedDebts); // Update the debts state with the updated array
+        } else {
+          console.warn('Deleted debt not found in the debts array');
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting debt', error);
+      // Handle error state or feedback to the user
+    }
+  };
   return (
     <div className="bg-white rounded-lg shadow-md p-6 m-4">
-      <div className="flex items-center justify-center gap-4 py-4">
-        <h3 className=" text-lg font-semibold  text-black">E commerce Debts</h3>
-        <div className=" flex items-center gap-2">
-          <img src="/images/icon/icon-black-plus.svg" />
-          <img src="/images/icon/icon-black-three-dots.svg" />
+      <div className="flex items-center justify-between gap-4 py-4">
+        <h3 className="text-lg font-semibold text-black">{category} Debts</h3>
+        <div className="flex items-center gap-2">
+          <img
+            onClick={() =>
+              navigate('/edit-debts', {
+                state: {
+                  prevDN: debtName,
+                  prevC: category,
+                  prevP: payments,
+                  id: debtId,
+                },
+              })
+            }
+            src="/public/images/icon/icon-gray-edit.svg"
+            alt="Edit"
+            className=" cursor-pointer"
+          />
+          <img
+            onClick={() => handleDeleteDebt(debtId)}
+            className=" cursor-pointer"
+            src="/public/images/icon/icon-gray-delete.svg"
+            alt="Delete"
+          />
         </div>
       </div>
       <h2 className="text-sm font-semibold text-black text-center bg-[#e9d7f4] rounded-md px-4 py-3 mb-4">
         {debtName}
       </h2>
-      <DonutChart />
+      <DonutChart payments={payments} />
       <div className="mt-4 text-[#777777]">
         <table className="w-full">
           <thead>
             <tr className="bg-[#f0f0f0]">
-              <th className=" text-black text-start py-2 px-3">Debts</th>
-              <th className=" text-black text-start py-2 px-3">$</th>
+              <th className="text-black text-start py-2 px-3">Debts</th>
+              <th className="text-black text-start py-2 px-3">$</th>
             </tr>
           </thead>
           <tbody>
-            <tr className=" border-b border-[#d3d2d2]">
-              <td className="text-gray-700 text-start py-2 px-3">
-                Debt To Pay
-              </td>
-              <td className="text-gray-700 text-start py-2 px-3">
-                ${debtToPay}
-              </td>
-            </tr>
-            <tr className=" border-b border-[#d3d2d2]">
-              <td className="text-gray-700 text-start py-2 px-3">Debt Paid</td>
-              <td className="text-gray-700 text-start py-2 px-3">
-                ${debtPaid}
-              </td>
-            </tr>
-            <tr className=" border-b border-[#d3d2d2]">
-              <td className="text-gray-700 text-start py-2 px-3">
-                Left To Save
-              </td>
-              <td className="text-gray-700 text-start py-2 px-3">
-                ${leftToSave}
-              </td>
-            </tr>
+            {displayedPayments.map((payment, idx) => (
+              <tr key={idx} className="border-b border-[#d3d2d2]">
+                <td className="text-gray-700 text-start py-2 px-3">
+                  {payment.name}
+                </td>
+                <td className="text-gray-700 text-start py-2 px-3">
+                  ${payment.amount}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
-      <div className="flex justify-center items-center">
-        <button className=" text-black border-2 font-semibold w-max  rounded-full py-2 px-4 mt-4">
-          View details
-        </button>
-      </div>
+      {payments.length > 3 && (
+        <div className="flex justify-center items-center">
+          <button
+            className="text-black border-2 font-semibold w-max rounded-full py-2 px-4 mt-4"
+            onClick={() => setShowAll(!showAll)}
+          >
+            {showAll ? 'Show Less' : 'View All'}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 // /pages/index.jsx
 import { useSidebarStore } from '../../Store Management/useSidebarStore';
+import { useBackendDataStore } from '../../Store Management/useBackendDataStore';
 import DefaultLayout from '../../layout/DefaultLayout';
 import Header from './components/Header/index';
+import { useNavigate } from 'react-router-dom';
+import { deleteDebt } from '../../libs/deleteApis';
 const data = [
   {
     debtName: 'Debt Name 1',
@@ -172,21 +205,29 @@ const data = [
 
 const Debts = () => {
   const { sidebarOpen, setSidebarOpen } = useSidebarStore();
+  const { debts } = useBackendDataStore();
   return (
     <DefaultLayout>
       {/* <!-- ===== Header Start ===== --> */}
       <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       {/* <!-- ===== Header End ===== --> */}
       <div className="flex justify-center flex-wrap">
-        {data.map((item, index) => (
-          <Card
-            key={index}
-            debtName={item.debtName}
-            debtToPay={item.debtToPay}
-            debtPaid={item.debtPaid}
-            leftToSave={item.leftToSave}
-          />
-        ))}
+        {debts?.length > 0 ? (
+          <>
+            {' '}
+            {debts?.map((debt, index) => (
+              <Card
+                key={index}
+                debtName={debt.debtName}
+                category={debt.category}
+                payments={debt.payments}
+                debtId={debt._id}
+              />
+            ))}
+          </>
+        ) : (
+          <h3 className=" text-black text-center my-24">No Debts</h3>
+        )}
       </div>
     </DefaultLayout>
   );

@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom';
 
 import UserOne from '/images/user/user-01.png';
 
-const DropdownList = ({dropDownoptions,type}) => {
+const DropdownList = ({dropDownoptions,selectedOption,setSelectedOption}) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
   const trigger = useRef<any>(null);
   const dropdown = useRef<any>(null);
 
@@ -44,7 +43,7 @@ const DropdownList = ({dropDownoptions,type}) => {
         to="#"
       >
             <h3 className="text-xl font-bold text-black">
-           {selectedOption || type}
+           {selectedOption}
             </h3>
         <img className={`${dropdownOpen ? "rotate-180":null} transition-all duration-200 ease-in-out`} src='/images/icon/icon-black-arrow-down.svg'/>
       </Link>
@@ -62,7 +61,10 @@ const DropdownList = ({dropDownoptions,type}) => {
       <div className="bg-white text-black font-medium">
         {
           dropDownoptions?.map((item,idx)=>(
-            <h3 key={idx} className="flex py-3 hover:bg-[#d9d8d7] px-3 items-center">
+            <h3 onClick={()=>{
+              setDropdownOpen(!dropdown)
+              setSelectedOption(item)
+            }} key={idx} className="flex py-3 cursor-pointer hover:bg-[#d9d8d7] px-3 items-center">
               {item}
         </h3>
           ))

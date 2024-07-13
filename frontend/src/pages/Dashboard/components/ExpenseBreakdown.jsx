@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const getArrow = (change) => {
   return change === 'up' ? '↑' : '↓';
@@ -32,11 +33,11 @@ const ExpensesCard = ({
         </p>
       </div>
     </div>
-    <div>
+    <Link to={'/expenses'}>
       <span className="text-2xl " style={{ color: color }}>
         →
       </span>
-    </div>
+    </Link>
   </div>
 );
 
@@ -48,17 +49,25 @@ const ExpensesBreakdown = ({ expenses }) => {
         <p className=" text-sm mt-4 self-end">*Compare to last month</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 shadow rounded-lg gap-4">
-        {expenses.map((expense, index) => (
-          <ExpensesCard
-            key={index}
-            category={expense.category}
-            amount={expense.amount}
-            percentage={parseInt(expense.percentage)}
-            change={parseInt(expense.percentage) >= 10 ? 'up' : 'down'}
-            color={expense.color}
-            icon={expense.icon}
-          />
-        ))}
+        {expenses?.length > 0 ? (
+          <>
+            {expenses.map((expense, index) => (
+              <ExpensesCard
+                key={index}
+                category={expense.category}
+                amount={expense.amount}
+                percentage={parseInt(expense.percentage)}
+                change={parseInt(expense.percentage) >= 10 ? 'up' : 'down'}
+                color={expense.color}
+                icon={expense.icon}
+              />
+            ))}
+          </>
+        ) : (
+          <h3 className=" text-center my-4 col-span-2 text-black">
+            No Expenses
+          </h3>
+        )}
       </div>
     </div>
   );

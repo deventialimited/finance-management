@@ -1,15 +1,28 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { addSaving } from '../../../libs/postApis';
 import { useBackendDataStore } from '../../../Store Management/useBackendDataStore';
+import { updateSaving } from '../../../libs/putApis';
 
-export default function AddCategoryModal({ isAOpen, setIsAOpen }) {
+export default function EditCategoryModal({ isEOpen, setIsEOpen }) {
   const { savings, updateAllSavings } = useBackendDataStore();
   const [category, setCategory] = useState('');
   const [accumulatedAmount, setAccumulatedAmount] = useState('');
   const [annualVariation, setAnnualVariation] = useState('');
   const [monthlyVariation, setMonthlyVariation] = useState('');
   const [errors, setErrors] = useState({});
+  const [generalError, setGeneralError] = useState('');
+
+  useEffect(() => {
+    if (isEOpen) {
+      setCategory(isEOpen?.category || '');
+      setAccumulatedAmount(isEOpen?.accumulatedAmount || '');
+      setAnnualVariation(isEOpen?.annualVariation || '');
+      setMonthlyVariation(isEOpen?.monthlyVariation || '');
+      setErrors({});
+      setGeneralError('');
+    }
+  }, [isEOpen]);
 
   const validate = () => {
     const newErrors = {};
@@ -23,7 +36,7 @@ export default function AddCategoryModal({ isAOpen, setIsAOpen }) {
 
     if (!annualVariation) {
       newErrors.annualVariation = 'Annual % Variation is required';
-    } 
+    }
 
     if (!monthlyVariation) {
       newErrors.monthlyVariation = 'Monthly % Variation is required';
@@ -36,43 +49,54 @@ export default function AddCategoryModal({ isAOpen, setIsAOpen }) {
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      setGeneralError(''); // Clear general error if there are specific field errors
     } else {
-      // Handle the save logic here
-      console.log({
-        category,
-        accumulatedAmount,
-        annualVariation,
-        monthlyVariation,
-      });
-      const result = await addSaving({
+      // Check if any value has changed
+      const isAnyValueChanged =
+        category !== isEOpen.category ||
+        accumulatedAmount !== isEOpen.accumulatedAmount ||
+        annualVariation !== isEOpen.annualVariation ||
+        monthlyVariation !== isEOpen.monthlyVariation;
+
+      if (!isAnyValueChanged) {
+        setGeneralError('At least one value must be changed');
+        return;
+      }
+
+      const result = await updateSaving(isEOpen._id, {
         category,
         accumulatedAmount,
         annualVariation,
         monthlyVariation,
       });
       if (result) {
-        console.log('Saving added successfully', result);
+        console.log('Saving updated successfully', result);
         // Reset form or show success message
-        savings
-          ? updateAllSavings([...savings, result])
-          : updateAllSavings([result]);
+        // Update savings array with the updated result
+        const updatedSavings = savings.map((saving) =>
+          saving._id === result._id ? result : saving,
+        );
+
+        updateAllSavings(updatedSavings);
         setCategory('');
         setAccumulatedAmount('');
         setAnnualVariation('');
         setMonthlyVariation('');
-        setIsAOpen(false);
+        setIsEOpen(false);
+        setErrors({});
+        setGeneralError('');
       }
     }
   };
 
   return (
     <>
-      <Transition appear show={isAOpen} as={Fragment}>
+      <Transition appear show={isEOpen} as={Fragment}>
         <Dialog
           as="div"
           style={{ zIndex: 99999999999000 }}
           className="relative z-10"
-          onClose={() => setIsAOpen(!isAOpen)}
+          onClose={() => setIsEOpen(!isEOpen)}
         >
           <Transition.Child
             as={Fragment}
@@ -100,14 +124,14 @@ export default function AddCategoryModal({ isAOpen, setIsAOpen }) {
                 <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
                   <div className="flex justify-between items-center bg-[#71299d] p-4 px-6 rounded-t-2xl">
                     <h2 className="text-white flex items-center text-xl font-semibold">
-                      New Category{' '}
+                      Edit Category{' '}
                       <img
                         src="/images/icon/icon-white-edit.svg"
                         className="mx-1"
                       />
                     </h2>
                     <button
-                      onClick={() => setIsAOpen(false)}
+                      onClick={() => setIsEOpen(false)}
                       className="text-white"
                     >
                       <img src="/images/icon/icon-cross.svg" />
@@ -174,9 +198,12 @@ export default function AddCategoryModal({ isAOpen, setIsAOpen }) {
                       <p className="text-red-500">{errors.monthlyVariation}</p>
                     )}
                   </div>
+                  {generalError && (
+                    <p className="text-red-500 px-6 mt-2">{generalError}</p>
+                  )}
                   <div className="mt-6 px-6 pb-4 flex justify-center gap-3 items-center">
                     <button
-                      onClick={() => setIsAOpen(false)}
+                      onClick={() => setIsEOpen(false)}
                       className="w-max inline-flex justify-center rounded-full border border-[#000] px-4 py-2 text-sm font-medium text-black shadow-sm hover:bg-gray-100"
                     >
                       Cancel

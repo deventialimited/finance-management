@@ -12,12 +12,13 @@ import Notifications from './pages/Notifications/Notification';
 import Profile from './pages/Profile/Profile';
 import Debts from "./pages/Debts/Debts"
 import AddDebts from './pages/AddDebts/AddDebts';
+import EditDebts from "./pages/EditDebts/EditDebts"
 import {useBackendDataStore} from "./Store Management/useBackendDataStore"
-import {getAllTransactions,getAllBills,getAllExpenses} from "./libs/getApis"
+import {getAllTransactions,getAllBills,getAllExpenses,getAllSavings,getAllDebts} from "./libs/getApis"
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const { pathname } = useLocation();
- const {updateAllBills,updateAllExpenses,updateAllTransactions}=useBackendDataStore()
+ const {updateAllBills,updateAllExpenses,updateAllTransactions,updateAllSavings,updateAllDebts}=useBackendDataStore()
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
@@ -34,6 +35,15 @@ function App() {
       const fetchedExpenses = await getAllExpenses();
       console.log(fetchedExpenses)
       updateAllExpenses(fetchedExpenses || []);
+
+      const fetchedSavings = await getAllSavings();
+      console.log(fetchedSavings)
+      updateAllSavings(fetchedSavings || []);
+
+      const fetchedDebts = await getAllDebts();
+      console.log(fetchedDebts)
+      updateAllDebts(fetchedDebts || []);
+
     };
     fetchData();
     setTimeout(() => {
@@ -87,6 +97,26 @@ function App() {
             </>
           }
         />
+        {/* Add Debts */}
+        <Route
+          path="/add-debts"
+          element={
+            <>
+              <PageTitle title="Finance | Add Debts" />
+              <AddDebts />
+            </>
+          }
+        />
+        {/* Edit Debts */}
+        <Route
+          path="/edit-debts"
+          element={
+            <>
+              <PageTitle title="Finance | Edit Debts" />
+              <EditDebts />
+            </>
+          }
+        />
         {/* Savings */}
         <Route
           path="/savings"
@@ -122,15 +152,6 @@ function App() {
             <>
               <PageTitle title="Finance | Profile" />
               <Profile />
-            </>
-          }
-        />
-        <Route
-          path="/add-debts"
-          element={
-            <>
-              <PageTitle title="Finance | Add Debts" />
-              <AddDebts />
             </>
           }
         />

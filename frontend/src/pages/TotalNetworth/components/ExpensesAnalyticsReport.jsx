@@ -3,8 +3,8 @@ import ReactApexChart from 'react-apexcharts';
 import DropdownList from './DropdownList';
 import { useBackendDataStore } from '../../../Store Management/useBackendDataStore';
 
-const AnalyticsReport = () => {
-  const [comparisonType, setComparisonType] = useState('Monthly');
+const ExpensesAnalyticsReport = () => {
+  const [comparisonType, setComparisonType] = useState('Yearly');
   const { expenses } = useBackendDataStore();
   const [seriesData, setSeriesData] = useState([]);
 
@@ -151,36 +151,21 @@ const AnalyticsReport = () => {
   };
 
   return (
-    <div className="w-full mt-8 text-[#acacad]">
-      <div className="bg-white rounded-lg shadow sm:p-4">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center">
-          <h2 className="text-2xl text-black font-semibold mb-4">
-            Analytics Report
-          </h2>
-          <div className="flex gap-3 items-center ">
-            <div className="flex items-center gap-3 ">
-              <DropdownList
-                dropDownoptions={['Monthly', 'Yearly']}
-                selectedOption={comparisonType}
-                setSelectedOption={setComparisonType}
-              />
-            </div>
-          </div>
-        </div>
-
-        {expenses?.length > 0 ? (
+    <div className="w-full mt-4 text-[#acacad]">
+      {expenses?.length > 0 ? (
+        <div className="bg-white rounded-lg shadow sm:p-4">
           <ReactApexChart
             options={options.options}
             series={options.series}
             type="area"
             height={250}
           />
-        ) : (
-          <h3 className=" text-center my-6 text-black">No Graph Data</h3>
-        )}
-      </div>
+        </div>
+      ) : (
+        <h3 className=' text-center my-6 text-black'>No Graph Data</h3>
+      )}
     </div>
   );
 };
 
-export default AnalyticsReport;
+export default ExpensesAnalyticsReport;
