@@ -3,12 +3,22 @@ const Saving = require("../models/Saving");
 // Add Saving
 exports.addSaving = async (req, res) => {
   try {
-    const { category, accumulatedAmount, annualVariation, monthlyVariation } =
-      req.body;
-
-    const newSaving = await Saving.create({
+    const {
+      savingName,
       category,
       accumulatedAmount,
+      annualByType,
+      monthlyByType,
+      annualVariation,
+      monthlyVariation,
+    } = req.body;
+
+    const newSaving = await Saving.create({
+      savingName,
+      category,
+      accumulatedAmount,
+      annualByType,
+      monthlyByType,
       annualVariation,
       monthlyVariation,
     });
@@ -30,13 +40,28 @@ exports.addSaving = async (req, res) => {
 // Update Saving by ID
 exports.updateSaving = async (req, res) => {
   try {
-    const { category, accumulatedAmount, annualVariation, monthlyVariation } =
-      req.body;
+    const {
+      savingName,
+      category,
+      accumulatedAmount,
+      annualByType,
+      monthlyByType,
+      annualVariation,
+      monthlyVariation,
+    } = req.body;
     const savingId = req.params.id; // Assuming you pass the saving ID through the URL params
 
     const updatedSaving = await Saving.findByIdAndUpdate(
       savingId,
-      { category, accumulatedAmount, annualVariation, monthlyVariation },
+      {
+        savingName,
+        category,
+        accumulatedAmount,
+        annualByType,
+        monthlyByType,
+        annualVariation,
+        monthlyVariation,
+      },
       { new: true } // To return the updated document
     );
 

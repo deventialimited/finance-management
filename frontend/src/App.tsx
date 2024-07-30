@@ -14,23 +14,21 @@ import Debts from "./pages/Debts/Debts"
 import AddDebts from './pages/AddDebts/AddDebts';
 import EditDebts from "./pages/EditDebts/EditDebts"
 import {useBackendDataStore} from "./Store Management/useBackendDataStore"
-import {getAllTransactions,getAllBills,getAllExpenses,getAllSavings,getAllDebts} from "./libs/getApis"
+import {useSidebarStore} from "./Store Management/useSidebarStore"
+import {getAllRevenues,getAllExpenses,getAllSavings,getAllDebts,getProfileById} from "./libs/getApis"
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const { pathname } = useLocation();
- const {updateAllBills,updateAllExpenses,updateAllTransactions,updateAllSavings,updateAllDebts}=useBackendDataStore()
+ const {updateAllExpenses,updateAllRevenues,updateAllSavings,updateAllDebts}=useBackendDataStore()
+ const {setProfileData}=useSidebarStore()
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
   useEffect(() => {
     const fetchData = async () => {
-      const fetchedTransactions = await getAllTransactions();
-      console.log(fetchedTransactions)
-      updateAllTransactions(fetchedTransactions || []);
-
-      const fetchedBills = await getAllBills();
-      console.log(fetchedBills)
-      updateAllBills(fetchedBills || []);
+      const fetchedRevenues = await getAllRevenues();
+      console.log(fetchedRevenues)
+      updateAllRevenues(fetchedRevenues || []);
 
       const fetchedExpenses = await getAllExpenses();
       console.log(fetchedExpenses)
@@ -43,6 +41,11 @@ function App() {
       const fetchedDebts = await getAllDebts();
       console.log(fetchedDebts)
       updateAllDebts(fetchedDebts || []);
+
+      
+  const id = '66a8bf4318f7ecfb60b31755'; // Profile ID
+      const fetchProfileData = await getProfileById(id);
+      setProfileData(fetchProfileData);
 
     };
     fetchData();

@@ -3,9 +3,9 @@ import ReactApexChart from 'react-apexcharts';
 import DropdownList from './DropdownList';
 import { useBackendDataStore } from '../../../Store Management/useBackendDataStore';
 
-const ExpensesAnalyticsReport = () => {
+const AnnualGraph = ({ totalSavingsAmount }) => {
   const [comparisonType, setComparisonType] = useState('Monthly');
-  const { expenses } = useBackendDataStore();
+  const { savings } = useBackendDataStore();
   const [seriesData, setSeriesData] = useState([]);
 
   useEffect(() => {
@@ -16,15 +16,15 @@ const ExpensesAnalyticsReport = () => {
 
     const calculateDailyTotals = (month, year) => {
       const totals = new Array(daysInMonth).fill(0);
-      expenses?.forEach((category) => {
-        category?.lists?.forEach((expense) => {
-          const expenseDate = new Date(expense.expenseDate);
+      savings?.forEach((category) => {
+        category?.lists?.forEach((saving) => {
+          const createdAt = new Date(saving.createdAt);
           if (
-            expenseDate.getFullYear() === year &&
-            expenseDate.getMonth() === month
+            createdAt.getFullYear() === year &&
+            createdAt.getMonth() === month
           ) {
-            const day = expenseDate.getDate() - 1;
-            totals[day] += expense.amount;
+            const day = createdAt.getDate() - 1;
+            totals[day] += saving.accumulatedAmount;
           }
         });
       });
@@ -33,49 +33,29 @@ const ExpensesAnalyticsReport = () => {
 
     const calculateMonthlyTotals = (year) => {
       const totals = new Array(12).fill(0);
-      expenses?.forEach((category) => {
-        category?.lists?.forEach((expense) => {
-          const expenseDate = new Date(expense.expenseDate);
-          if (expenseDate.getFullYear() === year) {
-            const month = expenseDate.getMonth();
-            totals[month] += expense.amount;
+      savings?.forEach((category) => {
+        category?.lists?.forEach((saving) => {
+          const createdAt = new Date(saving.createdAt);
+          if (createdAt.getFullYear() === year) {
+            const month = createdAt.getMonth();
+            totals[month] += saving.accumulatedAmount;
           }
         });
       });
       return totals;
     };
 
-    const calculateWeeklyTotals = () => {
-      const weekStart = new Date();
-      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekEnd.getDate() + 6);
-
-      const totals = Array(7).fill(0);
-      expenses?.forEach((category) => {
-        category?.lists?.forEach((expense) => {
-          const expenseDate = new Date(expense.expenseDate);
-          if (expenseDate >= weekStart && expenseDate <= weekEnd) {
-            const dayIndex = expenseDate.getDay();
-            totals[dayIndex] += expense.amount;
-          }
-        });
-      });
-      return totals;
-    };
     if (comparisonType === 'Monthly') {
       setSeriesData(calculateDailyTotals(currentMonth, currentYear));
-    } else if (comparisonType === 'Weekly') {
-      setSeriesData(calculateWeeklyTotals());
     } else if (comparisonType === 'Yearly') {
       setSeriesData(calculateMonthlyTotals(currentYear));
     }
-  }, [expenses, comparisonType]);
+  }, [savings, comparisonType]);
 
   const options = {
     series: [
       {
-        name: 'Expenses Analytics Report',
+        name: 'Annual Graphs',
         data: seriesData,
       },
     ],
@@ -121,9 +101,7 @@ const ExpensesAnalyticsReport = () => {
       },
       xaxis: {
         categories:
-          comparisonType === 'Weekly'
-            ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-            : comparisonType === 'Monthly'
+          comparisonType === 'Monthly'
             ? Array.from({ length: new Date().getDate() }, (_, i) => `${i + 1}`)
             : [
                 'Jan',
@@ -183,20 +161,26 @@ const ExpensesAnalyticsReport = () => {
       <div className="bg-white rounded-lg shadow sm:p-4">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center">
           <h2 className="text-2xl text-black font-semibold mb-4">
-            Expenses Analytics Report
+            Annual Graphs
           </h2>
           <div className="flex gap-3 items-center ">
-            <div className="flex items-center gap-3 ">
+            {/* <h3 className=" text-black font-bold flex items-center flex-col text-2xl">
+              ${totalSavingsAmount}.00 <br />{' '}
+              <span className=" font-medium text-xs text-[#71299d]">
+                Total saving
+              </span>
+            </h3> */}
+            {savings?.length > 0 && (
               <DropdownList
-                dropDownoptions={['Weekly', 'Monthly', 'Yearly']}
+                dropDownoptions={['Monthly', 'Yearly']}
                 selectedOption={comparisonType}
                 setSelectedOption={setComparisonType}
               />
-            </div>
+            )}
           </div>
         </div>
 
-        {expenses?.length > 0 ? (
+        {savings?.length > 0 ? (
           <ReactApexChart
             options={options.options}
             series={options.series}
@@ -211,4 +195,4 @@ const ExpensesAnalyticsReport = () => {
   );
 };
 
-export default ExpensesAnalyticsReport;
+export default AnnualGraph;

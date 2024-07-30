@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { addTransaction } from '../../../libs/postApis';
+import { addRevenue } from '../../../libs/postApis';
 import { useBackendDataStore } from '../../../Store Management/useBackendDataStore';
+import { getAllRevenues } from '../../../libs/getApis';
 const Dropdown = ({ label, options, placeholder, selected, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -43,13 +44,13 @@ const Dropdown = ({ label, options, placeholder, selected, onChange }) => {
     </div>
   );
 };
-const TransactionsForm = ({ isAEOpen, setIsAEOpen }) => {
-  const { transactions, updateAllTransactions } = useBackendDataStore();
+const RevenuesForm = ({ isAEOpen, setIsAEOpen }) => {
+  const { revenues, updateAllRevenues } = useBackendDataStore();
   const [formData, setFormData] = useState({
-    transactionName: '',
+    revenueName: '',
     category: '',
     amount: '',
-    transactionDate: '',
+    revenueDate: '',
   });
   const [errors, setErrors] = useState({});
 
@@ -60,8 +61,7 @@ const TransactionsForm = ({ isAEOpen, setIsAEOpen }) => {
 
   const validate = () => {
     const errors = {};
-    if (!formData.transactionName)
-      errors.transactionName = 'Transaction Name is required';
+    if (!formData.revenueName) errors.revenueName = 'Revenue Name is required';
     if (!formData.category) errors.category = 'Category is required';
     if (!formData.amount) {
       errors.amount = 'Amount is required';
@@ -69,8 +69,7 @@ const TransactionsForm = ({ isAEOpen, setIsAEOpen }) => {
       errors.amount = 'Amount must be greater than 0';
     }
 
-    if (!formData.transactionDate)
-      errors.transactionDate = 'Transaction Date is required';
+    if (!formData.revenueDate) errors.revenueDate = 'Revenue Date is required';
     return errors;
   };
   const handleDropdownChange = (name, value) => {
@@ -85,18 +84,17 @@ const TransactionsForm = ({ isAEOpen, setIsAEOpen }) => {
     setErrors(errors);
     if (Object.keys(errors).length === 0) {
       console.log('Form data:', formData);
-      const result = await addTransaction(formData);
+      const result = await addRevenue(formData);
       if (result) {
-        console.log('Transaction added successfully', result);
+        console.log('Revenue added successfully', result);
         // Reset form or show success message
-        transactions
-          ? updateAllTransactions([...transactions, result])
-          : updateAllTransactions([result]);
+        const fetchedRevenues = await getAllRevenues();
+        updateAllRevenues(fetchedRevenues || []);
         setFormData({
-          transactionName: '',
+          revenueName: '',
           category: '',
           amount: '',
-          transactionDate: '',
+          revenueDate: '',
         });
         setIsAEOpen(!isAEOpen);
       }
@@ -113,16 +111,16 @@ const TransactionsForm = ({ isAEOpen, setIsAEOpen }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 mt-12 text-[#767576]">
       <div>
-        <label className="block font-medium">Transactions Name</label>
+        <label className="block font-medium">Revenue Name</label>
         <input
           type="text"
-          name="transactionName"
-          value={formData.transactionName}
+          name="revenueName"
+          value={formData.revenueName}
           onChange={handleChange}
           className="w-full border border-[#adadad] rounded-lg p-2 outline-none"
         />
-        {errors.transactionName && (
-          <p className="text-red-500 text-sm">{errors.transactionName}</p>
+        {errors.revenueName && (
+          <p className="text-red-500 text-sm">{errors.revenueName}</p>
         )}
       </div>
       <div>
@@ -152,16 +150,16 @@ const TransactionsForm = ({ isAEOpen, setIsAEOpen }) => {
         )}
       </div>
       <div>
-        <label className="block font-medium">Transaction Date</label>
+        <label className="block font-medium">Revenue Date</label>
         <input
           type="date"
-          name="transactionDate"
-          value={formData.transactionDate}
+          name="revenueDate"
+          value={formData.revenueDate}
           onChange={handleChange}
           className="w-full border border-[#adadad] rounded-lg p-2 outline-none"
         />
-        {errors.transactionDate && (
-          <p className="text-red-500 text-sm">{errors.transactionDate}</p>
+        {errors.revenueDate && (
+          <p className="text-red-500 text-sm">{errors.revenueDate}</p>
         )}
       </div>
 
@@ -183,4 +181,4 @@ const TransactionsForm = ({ isAEOpen, setIsAEOpen }) => {
   );
 };
 
-export default TransactionsForm;
+export default RevenuesForm;

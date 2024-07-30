@@ -3,12 +3,14 @@ const Debt = require("../models/Debt");
 // Add Debt
 exports.addDebt = async (req, res) => {
   try {
-    const { debtName, category, payments } = req.body;
+    const { debtName, category, debtPaid, debtToPay, leftToSave } = req.body;
 
     const newDebt = await Debt.create({
       debtName,
       category,
-      payments,
+      debtPaid,
+      debtToPay,
+      leftToSave,
     });
 
     res.status(200).json({
@@ -27,12 +29,12 @@ exports.addDebt = async (req, res) => {
 // Update Debt by ID
 exports.updateDebt = async (req, res) => {
   try {
-    const { debtName, category, payments } = req.body;
+    const { debtName, category, debtPaid, debtToPay, leftToSave } = req.body;
     const debtId = req.params.id; // Assuming you pass the debt ID through the URL params
 
     const updatedDebt = await Debt.findByIdAndUpdate(
       debtId,
-      { debtName, category, payments },
+      { debtName, category, debtPaid, debtToPay, leftToSave },
       { new: true } // To return the updated document
     );
 

@@ -13,25 +13,64 @@ const Icons = {
   Shopping,
   Others,
 };
-const backend_base = 'http://localhost:4000'; // Replace with your backend base URL
+export const image_base = 'https://api.kinglaf.com/uploads/';
+const backend_base = 'https://api.kinglaf.com'; // Replace with your backend base URL
+// Replace with your backend base URL
 
-export const getAllTransactions = async () => {
+export const getProfileById = async (id) => {
   try {
     const response = await axios.get(
-      `${backend_base}/api/transactions/getAllTransactions`,
+      `${backend_base}/api/profile/getProfileById/${id}`,
     );
-    return response?.data?.transactions;
+    return response?.data?.profile;
   } catch (error) {
-    console.log('Error fetching transactions', error);
+    console.log('Error fetching profile', error);
   }
 };
 
-export const getAllBills = async () => {
+export const getAllRevenues = async () => {
   try {
-    const response = await axios.get(`${backend_base}/api/bills/getAllBills`);
-    return response?.data?.bills;
+    const response = await axios.get(
+      `${backend_base}/api/revenues/getAllRevenues`,
+    );
+    if (response?.data?.revenues) {
+      const categoryTemplate = {
+        color: '#4682B4', // Example color, adjust as needed
+      };
+
+      const groupedRevenues = {};
+      let totalAmount = 0;
+
+      response?.data?.revenues?.forEach((revenue) => {
+        if (!groupedRevenues[revenue.category]) {
+          groupedRevenues[revenue.category] = {
+            category: revenue.category,
+            amount: 0,
+            percentage: 0,
+            lists: [],
+            icon: Icons[revenue.category],
+            ...categoryTemplate,
+          };
+        }
+        groupedRevenues[revenue.category].amount += revenue.amount;
+        totalAmount += revenue.amount;
+        groupedRevenues[revenue.category].lists.push(revenue);
+      });
+
+      // Calculate percentage for each category
+      Object.keys(groupedRevenues).forEach((category) => {
+        groupedRevenues[category].percentage =
+          (groupedRevenues[category].amount / totalAmount) * 100;
+      });
+
+      // Convert groupedRevenues object to array
+      const result = Object.values(groupedRevenues);
+      return result;
+    } else {
+      return response?.data?.revenues;
+    }
   } catch (error) {
-    console.log('Error fetching bills', error);
+    console.log('Error fetching revenues', error);
   }
 };
 
@@ -49,7 +88,7 @@ export const getAllExpenses = async () => {
       let totalAmount = 0;
 
       // Group expenses by category and calculate total amount for each category
-      response?.data?.expenses.forEach((expense) => {
+      response?.data?.expenses?.forEach((expense) => {
         if (!groupedExpenses[expense.category]) {
           groupedExpenses[expense.category] = {
             category: expense.category,
@@ -66,7 +105,7 @@ export const getAllExpenses = async () => {
       });
 
       // Calculate percentage for each category
-      Object.keys(groupedExpenses).forEach((category) => {
+      Object.keys(groupedExpenses)?.forEach((category) => {
         groupedExpenses[category].percentage =
           (groupedExpenses[category].amount / totalAmount) * 100;
       });
@@ -85,7 +124,42 @@ export const getAllExpenses = async () => {
 export const getAllDebts = async () => {
   try {
     const response = await axios.get(`${backend_base}/api/debts/getAllDebts`);
-    return response?.data?.debts;
+    if (response?.data?.debts) {
+      const categoryTemplate = {
+        color: '#FF6347', // Example color, adjust as needed
+      };
+
+      const groupedDebts = {};
+      let totalDebtPaid = 0;
+
+      response?.data?.debts?.forEach((debt) => {
+        if (!groupedDebts[debt.category]) {
+          groupedDebts[debt.category] = {
+            category: debt.category,
+            debtPaid: 0,
+            percentage: 0,
+            lists: [],
+            icon: Icons[debt.category],
+            ...categoryTemplate,
+          };
+        }
+        groupedDebts[debt.category].debtPaid += debt.debtPaid;
+        totalDebtPaid += debt.debtPaid;
+        groupedDebts[debt.category].lists.push(debt);
+      });
+
+      // Calculate percentage for each category
+      Object.keys(groupedDebts).forEach((category) => {
+        groupedDebts[category].percentage =
+          (groupedDebts[category].debtPaid / totalDebtPaid) * 100;
+      });
+
+      // Convert groupedDebts object to array
+      const result = Object.values(groupedDebts);
+      return result;
+    } else {
+      return response?.data?.debts;
+    }
   } catch (error) {
     console.log('Error fetching debts', error);
   }
@@ -96,7 +170,45 @@ export const getAllSavings = async () => {
     const response = await axios.get(
       `${backend_base}/api/savings/getAllSavings`,
     );
-    return response?.data?.savings;
+    if (response?.data?.savings) {
+      const categoryTemplate = {
+        color: '#32CD32', // Example color, adjust as needed
+      };
+
+      const groupedSavings = {};
+      let totalAccumulatedAmount = 0;
+
+      response?.data?.savings?.forEach((saving) => {
+        if (!groupedSavings[saving.category]) {
+          groupedSavings[saving.category] = {
+            category: saving.category,
+            accumulatedAmount: 0,
+            percentage: 0,
+            lists: [],
+            icon: Icons[saving.category],
+            ...categoryTemplate,
+          };
+        }
+        groupedSavings[saving.category].accumulatedAmount +=
+          saving.accumulatedAmount;
+        totalAccumulatedAmount += saving.accumulatedAmount;
+        groupedSavings[saving.category].lists.push(saving);
+      });
+
+      // Calculate percentage for each category
+      Object.keys(groupedSavings).forEach((category) => {
+        groupedSavings[category].percentage =
+          (groupedSavings[category].accumulatedAmount /
+            totalAccumulatedAmount) *
+          100;
+      });
+
+      // Convert groupedSavings object to array
+      const result = Object.values(groupedSavings);
+      return result;
+    } else {
+      return response?.data?.savings;
+    }
   } catch (error) {
     console.log('Error fetching savings', error);
   }

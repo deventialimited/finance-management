@@ -1,28 +1,18 @@
 import axios from 'axios';
 
-const backend_base = 'http://localhost:4000'; // Replace with your backend base URL
+const backend_base = 'https://api.kinglaf.com'; // Replace with your backend base URL
+// Replace with your backend base URL
 
-export const addTransaction = async (formData) => {
+export const addRevenue = async (formData) => {
   try {
     const response = await axios.post(
-      `${backend_base}/api/transactions/addTransaction`,
+      `${backend_base}/api/revenues/addRevenue`,
       formData,
     );
-    return response?.data?.transaction;
+    console.log(response)
+    return response?.data?.revenue;
   } catch (error) {
-    console.log('Error adding transaction', error);
-  }
-};
-
-export const addBill = async (formData) => {
-  try {
-    const response = await axios.post(
-      `${backend_base}/api/bills/addBill`,
-      formData,
-    );
-    return response?.data?.bill;
-  } catch (error) {
-    console.log('Error adding bill', error);
+    console.log('Error adding revenue', error);
   }
 };
 

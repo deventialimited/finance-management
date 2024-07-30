@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { useBackendDataStore } from '../../../Store Management/useBackendDataStore';
+import AnnualGraph from './AnnualGraph';
 
 const TopTwoCards = () => {
   const { savings } = useBackendDataStore();
@@ -34,7 +35,10 @@ const TopTwoCards = () => {
     });
 
     // Prepare data for area graph
-    const labels = Array.from({ length: daysInMonth }, (_, i) => `Day ${i + 1}`);
+    const labels = Array.from(
+      { length: daysInMonth },
+      (_, i) => `Day ${i + 1}`,
+    );
     const data = dailyTotals;
 
     setDailyData({ labels, data });
@@ -55,7 +59,9 @@ const TopTwoCards = () => {
     savings.forEach((saving) => {
       const savingDate = new Date(saving.createdAt);
       if (savingDate.getFullYear() === currentYear) {
-        const monthYear = `${savingDate.getMonth() + 1}/${savingDate.getFullYear()}`;
+        const monthYear = `${
+          savingDate.getMonth() + 1
+        }/${savingDate.getFullYear()}`;
         if (monthlyTotals[monthYear] !== undefined) {
           monthlyTotals[monthYear] += saving.accumulatedAmount;
         }
@@ -179,6 +185,9 @@ const TopTwoCards = () => {
         toolbar: {
           show: false,
         },
+        zoom: {
+          enabled: false,
+        },
       },
       colors: ['#5c93fe', '#71299d', '#d39cf3'],
       plotOptions: {
@@ -246,83 +255,46 @@ const TopTwoCards = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
       <div className="">
-        <div className=" grid grid-cols-1 sm:grid-cols-10 gap-3 sm:gap-1">
-          <div className=" bg-[#71299d] sm:h-[80%] min-h-32 flex flex-col justify-between rounded-lg px-3 py-4 col-span-6">
-            <div className="flex justify-between items-center">
-              <h3 className="flex items-center gap-2">
-                <img src="/images/icon/icon-park-outline_protect.svg" />
-                <span className=" font-semibold text-xl text-white">
-                  ${totalSavingsAmount}.00
-                </span>
-              </h3>
-              <div className=" rounded-full p-1 bg-[#58197f]">
-                <img src="/images/icon/icon-solar_arrow-up-linear.svg" />
-              </div>
+        <div className=" bg-[#71299d] min-h-32 flex flex-col justify-between rounded-lg px-3 py-4 col-span-6">
+          <div className="flex justify-between items-center">
+            <h3 className="flex items-center gap-2">
+              <img src="/images/icon/icon-park-outline_protect.svg" />
+              <span className=" font-semibold text-xl text-white">
+                ${totalSavingsAmount}.00
+              </span>
+            </h3>
+            <div className=" rounded-full p-1 bg-[#58197f]">
+              <img src="/images/icon/icon-solar_arrow-up-linear.svg" />
             </div>
-            <h3 className="px-3 font-medium text-white">Total Savings</h3>
           </div>
-          <div className="bg-white px-3 sm:px-0 col-span-4">
-            <h3 className="text-md font-medium text-[#939393]">This Month</h3>
-            {savings?.length > 0 ? (
-              <>
-                <h3 className="text-lg font-extrabold text-black">87%</h3>
-                <div className="-mt-10">
-                  <ReactApexChart
-                    options={areaOptions.options}
-                    series={areaOptions.series}
-                    type="area"
-                    height={150}
-                  />
-                </div>
-              </>
-            ) : (
-              <h3 className=" text-center my-4 text-black">No Graph data</h3>
-            )}
-          </div>
+          <h3 className="px-3 font-medium text-white">Total Savings</h3>
         </div>
-        <div className="flex justify-between shadow my-3 rounded-2xl items-center px-4 py-8">
-          <h3 className=" text-black font-bold text-xl">Annual Graphs</h3>
-          <h3 className=" text-black font-bold flex items-center flex-col text-2xl">
-            ${totalSavingsAmount}.00 <br />{' '}
-            <span className=" font-medium text-xs text-[#71299d]">
-              Total saving
-            </span>
-          </h3>
-        </div>
-        <div className="bg-white">
-          {savings?.length > 0 ? (
-            <ReactApexChart
-              options={barOptions.options}
-              series={barOptions.series}
-              type="bar"
-              height={200}
-            />
-          ) : (
-            <h3 className=" text-center my-4 text-black">No Graph data</h3>
-          )}
-        </div>
+        <AnnualGraph totalSavingsAmount={totalSavingsAmount} />
       </div>
-      <div className="bg-white p-4 py-8 border border-[#e8e7e7] h-max my-6 rounded-2xl shadow space-y-4">
+      <div className="bg-white p-4 py-8 h-max my-6 rounded-2xl shadow space-y-4">
         <h2 className="text-2xl font-semibold text-black mb-4">My Savings</h2>
         {progressBars?.length > 0 ? (
           <>
-            {progressBars?.map((item, index) => (
-              <div
-                key={index}
-                className="flex gap-3 items-center text-black font-semibold text-xl"
-              >
-                <div className="flex flex-col w-full gap-2 justify-between">
-                  <span>{item.label}</span>
-                  <div className="w-full bg-[#e8e7e7] h-2 rounded-full overflow-hidden">
-                    <div
-                      className="bg-[#71299d] h-full"
-                      style={{ width: `${item.percent}%` }}
-                    ></div>
+            {progressBars
+              ?.slice()
+              .reverse()
+              .map((item, index) => (
+                <div
+                  key={index}
+                  className="flex gap-3 items-center text-black font-semibold text-xl"
+                >
+                  <div className="flex flex-col w-full gap-2 justify-between">
+                    <span>{item.label}</span>
+                    <div className="w-full bg-[#e8e7e7] h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#71299d] h-full"
+                        style={{ width: `${item.percent}%` }}
+                      ></div>
+                    </div>
                   </div>
+                  <span>${item.totalAmount}</span>
                 </div>
-                <span>${item.totalAmount}</span>
-              </div>
-            ))}
+              ))}
           </>
         ) : (
           <h3 className=" text-center my-6 text-black">No Savings</h3>

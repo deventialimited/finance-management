@@ -3,9 +3,9 @@ import ReactApexChart from 'react-apexcharts';
 import DropdownList from './DropdownList';
 import { useBackendDataStore } from '../../../Store Management/useBackendDataStore';
 
-const ExpensesAnalyticsReport = () => {
+const RevenuesAnalyticsReport = () => {
   const [comparisonType, setComparisonType] = useState('Monthly');
-  const { expenses } = useBackendDataStore();
+  const { revenues } = useBackendDataStore();
   const [seriesData, setSeriesData] = useState([]);
 
   useEffect(() => {
@@ -16,15 +16,33 @@ const ExpensesAnalyticsReport = () => {
 
     const calculateDailyTotals = (month, year) => {
       const totals = new Array(daysInMonth).fill(0);
-      expenses?.forEach((category) => {
-        category?.lists?.forEach((expense) => {
-          const expenseDate = new Date(expense.expenseDate);
+      revenues?.forEach((category) => {
+        category?.lists?.forEach((revenue) => {
+          const revenueDate = new Date(revenue.revenueDate);
           if (
-            expenseDate.getFullYear() === year &&
-            expenseDate.getMonth() === month
+            revenueDate.getFullYear() === year &&
+            revenueDate.getMonth() === month
           ) {
-            const day = expenseDate.getDate() - 1;
-            totals[day] += expense.amount;
+            const day = revenueDate.getDate() - 1;
+            totals[day] += revenue.amount;
+          }
+        });
+      });
+      return totals;
+    };
+    const calculateWeeklyTotals = () => {
+      const weekStart = new Date();
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      const totals = Array(7).fill(0);
+      revenues?.forEach((category) => {
+        category?.lists?.forEach((revenue) => {
+          const revenueDate = new Date(revenue.revenueDate);
+          if (revenueDate >= weekStart && revenueDate <= weekEnd) {
+            const dayIndex = revenueDate.getDay();
+            totals[dayIndex] += revenue.amount;
           }
         });
       });
@@ -33,36 +51,18 @@ const ExpensesAnalyticsReport = () => {
 
     const calculateMonthlyTotals = (year) => {
       const totals = new Array(12).fill(0);
-      expenses?.forEach((category) => {
-        category?.lists?.forEach((expense) => {
-          const expenseDate = new Date(expense.expenseDate);
-          if (expenseDate.getFullYear() === year) {
-            const month = expenseDate.getMonth();
-            totals[month] += expense.amount;
+      revenues?.forEach((category) => {
+        category?.lists?.forEach((revenue) => {
+          const revenueDate = new Date(revenue.revenueDate);
+          if (revenueDate.getFullYear() === year) {
+            const month = revenueDate.getMonth();
+            totals[month] += revenue.amount;
           }
         });
       });
       return totals;
     };
 
-    const calculateWeeklyTotals = () => {
-      const weekStart = new Date();
-      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekEnd.getDate() + 6);
-
-      const totals = Array(7).fill(0);
-      expenses?.forEach((category) => {
-        category?.lists?.forEach((expense) => {
-          const expenseDate = new Date(expense.expenseDate);
-          if (expenseDate >= weekStart && expenseDate <= weekEnd) {
-            const dayIndex = expenseDate.getDay();
-            totals[dayIndex] += expense.amount;
-          }
-        });
-      });
-      return totals;
-    };
     if (comparisonType === 'Monthly') {
       setSeriesData(calculateDailyTotals(currentMonth, currentYear));
     } else if (comparisonType === 'Weekly') {
@@ -70,12 +70,12 @@ const ExpensesAnalyticsReport = () => {
     } else if (comparisonType === 'Yearly') {
       setSeriesData(calculateMonthlyTotals(currentYear));
     }
-  }, [expenses, comparisonType]);
+  }, [revenues, comparisonType]);
 
   const options = {
     series: [
       {
-        name: 'Expenses Analytics Report',
+        name: 'Revenues Analytics Report',
         data: seriesData,
       },
     ],
@@ -183,7 +183,7 @@ const ExpensesAnalyticsReport = () => {
       <div className="bg-white rounded-lg shadow sm:p-4">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center">
           <h2 className="text-2xl text-black font-semibold mb-4">
-            Expenses Analytics Report
+            Revenues Analytics Report
           </h2>
           <div className="flex gap-3 items-center ">
             <div className="flex items-center gap-3 ">
@@ -196,7 +196,7 @@ const ExpensesAnalyticsReport = () => {
           </div>
         </div>
 
-        {expenses?.length > 0 ? (
+        {revenues?.length > 0 ? (
           <ReactApexChart
             options={options.options}
             series={options.series}
@@ -211,4 +211,4 @@ const ExpensesAnalyticsReport = () => {
   );
 };
 
-export default ExpensesAnalyticsReport;
+export default RevenuesAnalyticsReport;

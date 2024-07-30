@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import Chart from 'react-apexcharts';
 const DonutChart = ({ payments }) => {
   const chartOptions = {
-    series: payments?.map((payment) => parseFloat(payment.amount)),
+    series: payments?.map((payment) => parseFloat(payment)),
     options: {
       chart: {
         type: 'donut',
       },
-      labels: payments?.map((payment) => payment.name),
+      labels: ['Debt Paid', 'Debt To Pay', 'Left To Save'],
       dataLabels: {
         enabled: false,
       },
@@ -77,30 +77,24 @@ const DonutChart = ({ payments }) => {
 };
 
 // /components/Card.jsx
-const Card = ({ debtName, category, payments, debtId }) => {
+const Card = ({
+  debtName,
+  category,
+  debtPaid,
+  debtToPay,
+  leftToSave,
+  debtId,
+}) => {
   const { debts, updateAllDebts } = useBackendDataStore();
-  const [showAll, setShowAll] = useState(false);
   const navigate = useNavigate();
-  const displayedPayments = showAll ? payments : payments.slice(0, 3);
   const handleDeleteDebt = async (id) => {
     try {
       const result = await deleteDebt(id);
       if (result) {
         console.log('Debt deleted successfully', result);
-        // Handle state update or any other action after successful deletion
-        // Find index of the deleted debt in the debts array
-        const index = debts.findIndex((debt) => debt._id === result._id);
-
-        if (index !== -1) {
-          // Create a new array without the deleted debt
-          const updatedDebts = [
-            ...debts.slice(0, index),
-            ...debts.slice(index + 1),
-          ];
-          updateAllDebts(updatedDebts); // Update the debts state with the updated array
-        } else {
-          console.warn('Deleted debt not found in the debts array');
-        }
+        // Reset form or show success message
+        const fetchedDebts = await getAllDebts();
+        updateAllDebts(fetchedDebts || []);
       }
     } catch (error) {
       console.error('Error deleting debt', error);
@@ -118,19 +112,21 @@ const Card = ({ debtName, category, payments, debtId }) => {
                 state: {
                   prevDN: debtName,
                   prevC: category,
-                  prevP: payments,
+                  prevdebtPaid: debtPaid,
+                  prevdebtToPay: debtToPay,
+                  prevleftToSave: leftToSave,
                   id: debtId,
                 },
               })
             }
-            src="/public/images/icon/icon-gray-edit.svg"
+            src="/images/icon/icon-gray-edit.svg"
             alt="Edit"
             className=" cursor-pointer"
           />
           <img
             onClick={() => handleDeleteDebt(debtId)}
             className=" cursor-pointer"
-            src="/public/images/icon/icon-gray-delete.svg"
+            src="/images/icon/icon-gray-delete.svg"
             alt="Delete"
           />
         </div>
@@ -138,7 +134,7 @@ const Card = ({ debtName, category, payments, debtId }) => {
       <h2 className="text-sm font-semibold text-black text-center bg-[#e9d7f4] rounded-md px-4 py-3 mb-4">
         {debtName}
       </h2>
-      <DonutChart payments={payments} />
+      <DonutChart payments={[debtPaid, debtToPay, leftToSave]} />
       <div className="mt-4 text-[#777777]">
         <table className="w-full">
           <thead>
@@ -148,29 +144,31 @@ const Card = ({ debtName, category, payments, debtId }) => {
             </tr>
           </thead>
           <tbody>
-            {displayedPayments.map((payment, idx) => (
-              <tr key={idx} className="border-b border-[#d3d2d2]">
-                <td className="text-gray-700 text-start py-2 px-3">
-                  {payment.name}
-                </td>
-                <td className="text-gray-700 text-start py-2 px-3">
-                  ${payment.amount}
-                </td>
-              </tr>
-            ))}
+            <tr className="border-b border-[#d3d2d2]">
+              <td className="text-gray-700 text-start py-2 px-3">Debt Paid</td>
+              <td className="text-gray-700 text-start py-2 px-3">
+                ${debtPaid}
+              </td>
+            </tr>
+            <tr className="border-b border-[#d3d2d2]">
+              <td className="text-gray-700 text-start py-2 px-3">
+                Debt To Pay
+              </td>
+              <td className="text-gray-700 text-start py-2 px-3">
+                ${debtToPay}
+              </td>
+            </tr>
+            <tr className="border-b border-[#d3d2d2]">
+              <td className="text-gray-700 text-start py-2 px-3">
+                Left To Save
+              </td>
+              <td className="text-gray-700 text-start py-2 px-3">
+                ${leftToSave}
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
-      {payments.length > 3 && (
-        <div className="flex justify-center items-center">
-          <button
-            className="text-black border-2 font-semibold w-max rounded-full py-2 px-4 mt-4"
-            onClick={() => setShowAll(!showAll)}
-          >
-            {showAll ? 'Show Less' : 'View All'}
-          </button>
-        </div>
-      )}
     </div>
   );
 };
@@ -182,26 +180,7 @@ import DefaultLayout from '../../layout/DefaultLayout';
 import Header from './components/Header/index';
 import { useNavigate } from 'react-router-dom';
 import { deleteDebt } from '../../libs/deleteApis';
-const data = [
-  {
-    debtName: 'Debt Name 1',
-    debtToPay: 100,
-    debtPaid: 100,
-    leftToSave: 100,
-  },
-  {
-    debtName: 'Debt Name 1',
-    debtToPay: 100,
-    debtPaid: 100,
-    leftToSave: 100,
-  },
-  {
-    debtName: 'Debt Name 1',
-    debtToPay: 100,
-    debtPaid: 100,
-    leftToSave: 100,
-  },
-];
+import { getAllDebts } from '../../libs/getApis';
 
 const Debts = () => {
   const { sidebarOpen, setSidebarOpen } = useSidebarStore();
@@ -214,15 +193,24 @@ const Debts = () => {
       <div className="flex justify-center flex-wrap">
         {debts?.length > 0 ? (
           <>
-            {' '}
-            {debts?.map((debt, index) => (
-              <Card
-                key={index}
-                debtName={debt.debtName}
-                category={debt.category}
-                payments={debt.payments}
-                debtId={debt._id}
-              />
+            {debts?.map((item, index) => (
+              <>
+                {' '}
+                {item?.lists
+                  ?.slice()
+                  .reverse()
+                  .map((debt, index) => (
+                    <Card
+                      key={index}
+                      debtName={debt.debtName}
+                      category={debt.category}
+                      debtPaid={debt.debtPaid}
+                      debtToPay={debt.debtToPay}
+                      leftToSave={debt.leftToSave}
+                      debtId={debt._id}
+                    />
+                  ))}
+              </>
             ))}
           </>
         ) : (

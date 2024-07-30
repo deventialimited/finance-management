@@ -5,14 +5,7 @@ const getArrow = (change) => {
   return change === 'up' ? '↑' : '↓';
 };
 
-const ExpensesCard = ({
-  category,
-  amount,
-  percentage,
-  change,
-  color,
-  icon,
-}) => (
+const Card = ({ category, amount, percentage, change, color, icon }) => (
   <div className="flex justify-between text-[#7c7c80] items-center p-4 bg-white">
     <div className="flex items-center">
       <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
@@ -33,7 +26,7 @@ const ExpensesCard = ({
         </p>
       </div>
     </div>
-    <Link to={'/expenses'}>
+    <Link to={'/revenues'}>
       <span className="text-2xl " style={{ color: color }}>
         →
       </span>
@@ -41,32 +34,32 @@ const ExpensesCard = ({
   </div>
 );
 
-const ExpensesBreakdown = ({ expenses }) => {
-  console.log(expenses)
+const RevenuesBreakdown = ({ revenues }) => {
+  console.log(revenues)
   return (
     <div className="">
       <div className="flex mb-4 flex-col sm:flex-row text-[#7c7c80] sm:items-center justify-between">
-        <h2 className="text-2xl ">Expenses Breakdown</h2>
+        <h2 className="text-2xl ">Revenues Breakdown</h2>
         <p className=" text-sm mt-4 self-end">*Compare to last month</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 shadow rounded-lg gap-4">
-        {expenses?.length > 0 ? (
+        {revenues?.length > 0 ? (
           <>
-            {expenses.map((expense, index) => (
-              <ExpensesCard
+            {revenues.map((revenue, index) => (
+              <Card
                 key={index}
-                category={expense.category}
-                amount={expense.amount}
-                percentage={parseInt(expense.percentage)}
-                change={parseInt(expense.percentage) >= 10 ? 'up' : 'down'}
-                color={expense.color}
-                icon={expense.icon}
+                category={revenue.category}
+                amount={revenue.amount}
+                percentage={parseInt(revenue.percentage)}
+                change={parseInt(revenue.percentage) >= 10 ? 'up' : 'down'}
+                color={revenue.color}
+                icon={revenue.icon}
               />
             ))}
           </>
         ) : (
           <h3 className=" text-center my-4 col-span-2 text-black">
-            No Expenses
+            No revenues
           </h3>
         )}
       </div>
@@ -74,4 +67,4 @@ const ExpensesBreakdown = ({ expenses }) => {
   );
 };
 
-export default ExpensesBreakdown;
+export default RevenuesBreakdown;

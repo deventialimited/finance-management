@@ -4,29 +4,70 @@ import DropdownList from './DropdownList';
 import { useBackendDataStore } from '../../../Store Management/useBackendDataStore';
 
 const DebtsAnalyticsReport = () => {
-  const [comparisonType, setComparisonType] = useState('Yearly');
+  const [comparisonType, setComparisonType] = useState('Monthly');
   const { debts } = useBackendDataStore();
   const [seriesData, setSeriesData] = useState([]);
 
   useEffect(() => {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-    const calculateMonthlyTotals = (year) => {
-      const totals = new Array(12).fill(0);
-      debts.forEach((debt) => {
-        debt.payments.forEach((payment) => {
-          const paymentDate = new Date(debt.createdAt); // Assuming debts have a `createdAt` date
-          if (paymentDate.getFullYear() === year) {
-            const month = paymentDate.getMonth();
-            totals[month] += payment.amount;
+    const calculateDailyTotals = (month, year) => {
+      const totals = new Array(daysInMonth).fill(0);
+      debts?.forEach((category) => {
+        category?.lists?.forEach((debt) => {
+          const createdAt = new Date(debt.createdAt);
+          if (
+            createdAt.getFullYear() === year &&
+            createdAt.getMonth() === month
+          ) {
+            const day = createdAt.getDate() - 1;
+            totals[day] += debt.debtPaid;
           }
         });
       });
       return totals;
     };
 
-    if (comparisonType === 'Yearly') {
+    const calculateMonthlyTotals = (year) => {
+      const totals = new Array(12).fill(0);
+      debts?.forEach((category) => {
+        category?.lists?.forEach((debt) => {
+          const createdAt = new Date(debt.createdAt);
+          if (createdAt.getFullYear() === year) {
+            const month = createdAt.getMonth();
+            totals[month] += debt.debtPaid;
+          }
+        });
+      });
+      return totals;
+    };
+
+    const calculateWeeklyTotals = () => {
+      const weekStart = new Date();
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      const totals = Array(7).fill(0);
+      debts?.forEach((category) => {
+        category?.lists?.forEach((debt) => {
+          const createdAt = new Date(debt.createdAt);
+          if (createdAt >= weekStart && createdAt <= weekEnd) {
+            const dayIndex = createdAt.getDay();
+            totals[dayIndex] += debt.debtPaid;
+          }
+        });
+      });
+      return totals;
+    };
+    if (comparisonType === 'Monthly') {
+      setSeriesData(calculateDailyTotals(currentMonth, currentYear));
+    } else if (comparisonType === 'Weekly') {
+      setSeriesData(calculateWeeklyTotals());
+    } else if (comparisonType === 'Yearly') {
       setSeriesData(calculateMonthlyTotals(currentYear));
     }
   }, [debts, comparisonType]);
@@ -34,7 +75,7 @@ const DebtsAnalyticsReport = () => {
   const options = {
     series: [
       {
-        name: 'Debts Report',
+        name: 'Debts Analytics Report',
         data: seriesData,
       },
     ],
@@ -44,6 +85,9 @@ const DebtsAnalyticsReport = () => {
         height: 350,
         toolbar: {
           show: false,
+        },
+        zoom: {
+          enabled: false,
         },
       },
       stroke: {
@@ -76,20 +120,28 @@ const DebtsAnalyticsReport = () => {
         enabled: false,
       },
       xaxis: {
-        categories: [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ],
+        categories:
+          comparisonType === 'Weekly'
+            ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+            : comparisonType === 'Monthly'
+            ? Array.from({ length: new Date().getDate() }, (_, i) => `${i + 1}`)
+            : [
+                'Jan',
+                'Feb',
+                'Mar',
+                'Apr',
+                'May',
+                'Jun',
+                'Jul',
+                'Aug',
+                'Sep',
+                'Oct',
+                'Nov',
+                'Dec',
+              ],
+        axisBorder: {
+          show: false,
+        },
         labels: {
           style: {
             colors: ['#000'],
@@ -127,19 +179,34 @@ const DebtsAnalyticsReport = () => {
   };
 
   return (
-    <div className="w-full mt-4 text-[#acacad]">
-      {debts?.length > 0 ? (
-        <div className="bg-white rounded-lg shadow sm:p-4">
+    <div className="w-full mt-8 text-[#acacad]">
+      <div className="bg-white rounded-lg shadow sm:p-4">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center">
+          <h2 className="text-2xl text-black font-semibold mb-4">
+            Debts Analytics Report
+          </h2>
+          <div className="flex gap-3 items-center ">
+            <div className="flex items-center gap-3 ">
+              <DropdownList
+                dropDownoptions={['Weekly', 'Monthly', 'Yearly']}
+                selectedOption={comparisonType}
+                setSelectedOption={setComparisonType}
+              />
+            </div>
+          </div>
+        </div>
+
+        {debts?.length > 0 ? (
           <ReactApexChart
             options={options.options}
             series={options.series}
             type="area"
             height={250}
           />
-        </div>
-      ) : (
-        <h3 className=" text-center my-6 text-black">No Graph Data</h3>
-      )}
+        ) : (
+          <h3 className=" text-center my-6 text-black">No Graph Data</h3>
+        )}
+      </div>
     </div>
   );
 };

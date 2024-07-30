@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import Logo from '../../images/logo/logo.svg';
-
+import {image_base} from "../../libs/getApis"
+import {useSidebarStore } from "../../Store Management/useSidebarStore"
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (arg: boolean) => void;
@@ -10,6 +11,7 @@ interface SidebarProps {
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   const location = useLocation();
+  const {profileData} =useSidebarStore()
   const { pathname } = location;
   console.log(sidebarOpen)
  const navigate=useNavigate()
@@ -115,11 +117,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       <div className="flex items-center justify-between px-6 gap-2 py-5.5 lg:py-6.5">
         <div className='px-4 md:mt-16'>
           <div className='mb-3 relative'>
-          <img src='/images/dummy-user.png' className=' rounded-2xl'/>
-          <span className=' text-white font-bold text-xs py-1 px-2 bg-red-800 rounded-full absolute left-14 -top-2 shadow'>4</span>
+          <img src={image_base + profileData?.image} className=' rounded-2xl'/>
+          <span className=' text-white font-bold text-xs py-1 px-2 bg-red-800 rounded-full absolute left-20 top-0 shadow'>4</span>
           </div>
-          <h3 className=' text-white font-extrabold flex items-center gap-2 text-2xl'>Samantha <img onClick={()=>navigate('/profile')} src='/images/icon/icon-white-edit.svg'/></h3>
-          <h4 className='text-[#656565] text-lg'>samantha@email.com</h4>
+          <h3 className=' text-white font-extrabold flex items-center gap-2 text-2xl'>{profileData?.firstName} <img onClick={()=>navigate('/profile')} src='/images/icon/icon-white-edit.svg'/></h3>
+          <h4 className='text-[#656565] text-lg'>{profileData?.email}</h4>
         </div>
       </div>
       {/* <!-- SIDEBAR HEADER --> */}

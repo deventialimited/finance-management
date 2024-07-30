@@ -1,16 +1,11 @@
 const mongoose = require("mongoose");
-
-// Define Payment schema
-const PaymentSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  amount: { type: Number, required: true }
-});
-
 // Define Debt schema
 const DebtSchema = new mongoose.Schema({
   debtName: { type: String, required: true },
   category: { type: String, required: true },
-  payments: [PaymentSchema],
+  debtPaid: { type: String, required: true },
+  debtToPay: { type: String, required: true },
+  leftToSave: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 

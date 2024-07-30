@@ -43,3 +43,31 @@ exports.getAllExpenses = async (req, res) => {
     });
   }
 };
+
+// Delete Expense by ID
+exports.deleteExpense = async (req, res) => {
+  try {
+    const ExpenseId = req.params.id;
+
+    const deletedExpense = await Expense.findByIdAndDelete(ExpenseId);
+
+    if (!deletedExpense) {
+      return res.status(404).json({
+        success: false,
+        message: "Expense not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Expense deleted successfully",
+      expense: deletedExpense,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};

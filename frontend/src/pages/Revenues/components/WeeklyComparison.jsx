@@ -5,7 +5,7 @@ import { useBackendDataStore } from '../../../Store Management/useBackendDataSto
 
 const Statistics = () => {
   const [selectedOption, setSelectedOption] = useState('Weekly Comparison');
-  const { expenses } = useBackendDataStore();
+  const { revenues } = useBackendDataStore();
   const [seriesData, setSeriesData] = useState({ current: [], previous: [] });
 
   useEffect(() => {
@@ -15,16 +15,16 @@ const Statistics = () => {
 
     const calculateWeeklyTotals = (startDate) => {
       const totals = new Array(7).fill(0);
-      expenses.forEach((category) => {
-        category.lists.forEach((expense) => {
-          const expenseDate = new Date(expense.expenseDate);
+      revenues?.forEach((category) => {
+        category?.lists?.forEach((revenue) => {
+          const revenueDate = new Date(revenue.revenueDate);
           if (
-            expenseDate >= startDate &&
-            expenseDate <
+            revenueDate >= startDate &&
+            revenueDate <
               new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000)
           ) {
-            const dayOfWeek = expenseDate.getDay();
-            totals[dayOfWeek] += expense.amount;
+            const dayOfWeek = revenueDate.getDay();
+            totals[dayOfWeek] += revenue.amount;
           }
         });
       });
@@ -33,12 +33,12 @@ const Statistics = () => {
 
     const calculateMonthlyTotals = (year) => {
       const totals = new Array(12).fill(0);
-      expenses.forEach((category) => {
-        category.lists.forEach((expense) => {
-          const expenseDate = new Date(expense.expenseDate);
-          if (expenseDate.getFullYear() === year) {
-            const month = expenseDate.getMonth();
-            totals[month] += expense.amount;
+      revenues?.forEach((category) => {
+        category?.lists?.forEach((revenue) => {
+          const revenueDate = new Date(revenue.revenueDate);
+          if (revenueDate.getFullYear() === year) {
+            const month = revenueDate.getMonth();
+            totals[month] += revenue.amount;
           }
         });
       });
@@ -62,7 +62,7 @@ const Statistics = () => {
         previous: calculateMonthlyTotals(lastYear),
       });
     }
-  }, [expenses, selectedOption]);
+  }, [revenues, selectedOption]);
 
   const options = {
     series: [
@@ -83,6 +83,9 @@ const Statistics = () => {
         height: 350,
         toolbar: {
           show: false,
+        },
+        zoom: {
+          enabled: false,
         },
       },
       plotOptions: {
@@ -157,8 +160,8 @@ const Statistics = () => {
 
   return (
     <div className="w-full text-[#7c7c80]">
-      <h2 className="text-2xl mb-4 p-2">Statistics</h2>
-      <div className="bg-white rounded-lg shadow sm:p-2">
+      <h2 className="text-2xl mb-4">Statistics</h2>
+      <div className="bg-white rounded-lg shadow sm:p-4">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center">
           <DropdownList
             dropDownoptions={['Weekly Comparison', 'Yearly Comparison']}
@@ -180,7 +183,7 @@ const Statistics = () => {
             </div>
           </div>
         </div>
-        {expenses?.length > 0 ? (
+        {revenues?.length > 0 ? (
           <ReactApexChart
             options={options.options}
             series={options.series}

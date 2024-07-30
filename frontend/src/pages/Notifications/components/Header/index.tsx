@@ -73,7 +73,6 @@ const Header = (props: {
           
        
    {/* <!-- Notification Menu Area --> */}
-   <DropdownNotification />
           </ul>
         </div>
       </div>
